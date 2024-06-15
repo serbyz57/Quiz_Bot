@@ -42,7 +42,7 @@ async def update_quiz_score(user_id, score):
     # Создаем соединение с базой данных (если она не существует, она будет создана)
     async with aiosqlite.connect(DB_NAME) as db:
         # Вставляем новую запись или заменяем ее, если с данным user_id уже существует
-        await db.execute('INSERT OR REPLACE INTO score (user_id, score) VALUES (?, ?)', (user_id, score))
+        await db.execute('INSERT OR REPLACE INTO quiz_state (user_id, score) VALUES (?, ?)', (user_id, score))
         # Сохраняем изменения
         await db.commit()
 

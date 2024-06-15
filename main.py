@@ -47,9 +47,9 @@ async def right_answer(callback: types.CallbackQuery):
     current_question_index += 1
     await update_quiz_index(callback.from_user.id, current_question_index)
     # Обновление счета игрока
-    score = await get_quiz_score(callback.from_user.id)
-    score += 1
-    await update_quiz_score(callback.from_user.id, score)
+    current_score = await get_quiz_score(callback.from_user.id)
+    current_score += 1
+    await update_quiz_score(callback.from_user.id, current_score)
 
     if current_question_index < len(quiz_data):
         await get_question(callback.message, callback.from_user.id)
@@ -102,9 +102,9 @@ async def get_question(message, user_id):
 async def new_quiz(message):
     user_id = message.from_user.id
     current_question_index = 0
-    score = 0
+    current_score = 0
     await update_quiz_index(user_id, current_question_index)
-    await update_quiz_index(user_id, score)
+    await update_quiz_score(user_id, current_score)
     await get_question(message, user_id)
 
 
@@ -120,9 +120,10 @@ async def cmd_quiz(message: types.Message):
 # Хэндлер на команду /score
 @dp.message(F.text == "Статистика")
 @dp.message(Command("score"))
-async def cmd_score(callback: types.CallbackQuery):
-    score = await get_quiz_score(callback.from_user.id)
-    await callback.message.answer(f"Количество ваших очков: {score}")
+async def cmd_score(message: types.Message):
+    user_id = message.from_user.id
+    current_score = await get_quiz_score(user_id)
+    await message.answer(f"Количество ваших очков: {current_score}")
 
 
 # Запуск процесса поллинга новых апдейтов
