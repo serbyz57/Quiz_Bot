@@ -45,11 +45,10 @@ async def right_answer(callback: types.CallbackQuery):
     await callback.message.answer(f'Верно! Это "{quiz_data[current_question_index]['options'][correct_option]}"')
     # Обновление номера текущего вопроса в базе данных
     current_question_index += 1
-    await update_quiz_index(callback.from_user.id, current_question_index)
     # Обновление счета игрока
     current_score = await get_quiz_score(callback.from_user.id)
     current_score += 1
-    await update_quiz_score(callback.from_user.id, current_score)
+    await update_quiz_index(callback.from_user.id, current_question_index, current_score)
 
     if current_question_index < len(quiz_data):
         await get_question(callback.message, callback.from_user.id)
@@ -67,13 +66,15 @@ async def wrong_answer(callback: types.CallbackQuery):
 
     # Получение текущего вопроса из словаря состояний пользователя
     current_question_index = await get_quiz_index(callback.from_user.id)
+    current_score = await get_quiz_score(callback.from_user.id)
     correct_option = quiz_data[current_question_index]['correct_option']
 
     await callback.message.answer(f"Неправильно. Правильный ответ: {quiz_data[current_question_index]['options'][correct_option]}")
 
     # Обновление номера текущего вопроса в базе данных
     current_question_index += 1
-    await update_quiz_index(callback.from_user.id, current_question_index)
+    current_score += 0
+    await update_quiz_index(callback.from_user.id, current_question_index, current_score)
 
     if current_question_index < len(quiz_data):
         await get_question(callback.message, callback.from_user.id)
@@ -90,7 +91,6 @@ async def cmd_start(message: types.Message):
 
 
 async def get_question(message, user_id):
-
     # Получение текущего вопроса из словаря состояний пользователя
     current_question_index = await get_quiz_index(user_id)
     correct_index = quiz_data[current_question_index]['correct_option']
@@ -103,8 +103,7 @@ async def new_quiz(message):
     user_id = message.from_user.id
     current_question_index = 0
     current_score = 0
-    await update_quiz_index(user_id, current_question_index)
-    await update_quiz_score(user_id, current_score)
+    await update_quiz_index(user_id, current_question_index, current_score)
     await get_question(message, user_id)
 
 
@@ -112,7 +111,6 @@ async def new_quiz(message):
 @dp.message(F.text == "Начать игру")
 @dp.message(Command("quiz"))
 async def cmd_quiz(message: types.Message):
-
     await message.answer(f"Давайте начнем квиз!")
     await new_quiz(message)
 
@@ -131,7 +129,6 @@ async def main():
 
     # Запускаем создание таблицы базы данных
     await create_table()
-
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

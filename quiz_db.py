@@ -16,11 +16,12 @@ async def get_quiz_index(user_id):
                 return 0
 
 
-async def update_quiz_index(user_id, index):
+async def update_quiz_index(user_id, index, score):
     # Создаем соединение с базой данных (если она не существует, она будет создана)
     async with aiosqlite.connect(DB_NAME) as db:
         # Вставляем новую запись или заменяем ее, если с данным user_id уже существует
-        await db.execute('INSERT OR REPLACE INTO quiz_state (user_id, question_index) VALUES (?, ?)', (user_id, index))
+        await db.execute('INSERT OR REPLACE INTO quiz_state (user_id, question_index, score) VALUES (?, ?, ?)',
+                         (user_id, index, score))
         # Сохраняем изменения
         await db.commit()
 
@@ -36,15 +37,6 @@ async def get_quiz_score(user_id):
                 return results[0]
             else:
                 return 0
-
-
-async def update_quiz_score(user_id, score):
-    # Создаем соединение с базой данных (если она не существует, она будет создана)
-    async with aiosqlite.connect(DB_NAME) as db:
-        # Вставляем новую запись или заменяем ее, если с данным user_id уже существует
-        await db.execute('INSERT OR REPLACE INTO quiz_state (user_id, score) VALUES (?, ?)', (user_id, score))
-        # Сохраняем изменения
-        await db.commit()
 
 
 async def create_table():
